@@ -1732,6 +1732,11 @@ var _ = ginkgo.Describe("e2e ingress traffic validation", func() {
 
 		ginkgo.AfterEach(func() {
 			deleteClusterExternalContainer(clientContainerName)
+
+			for _, pod := range endPoints {
+				err := e2epod.DeletePodWithWait(f.ClientSet, pod)
+				framework.ExpectNoError(err)
+			}
 		})
 
 		// This test validates ingress traffic to nodeports.

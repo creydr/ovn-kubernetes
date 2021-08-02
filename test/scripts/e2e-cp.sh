@@ -7,7 +7,7 @@ export KUBERNETES_CONFORMANCE_TEST=y
 export KUBECONFIG=${HOME}/admin.conf
 
 # Skip tests which are not IPv6 ready yet (see description of https://github.com/ovn-org/ovn-kubernetes/pull/2276)
-IPV6_SKIPPED_TESTS="Should be allowed by externalip services|\
+IPV6_SKIPPED_TESTS="Should be allowed by externalip services to a new node ip|\
 should provide connection to external host by DNS name from a pod|\
 should provide Internet connection continuously when master is killed|\
 should provide Internet connection continuously when ovn-k8s pod is killed|\
