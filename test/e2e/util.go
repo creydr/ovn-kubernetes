@@ -226,9 +226,22 @@ func externalIPServiceSpecFrom(svcName string, httpPort, updPort, clusterHTTPPor
 	return res
 }
 
+func pokeEndpointHostnameWithRetry(clientContainer, protocol, targetHost string, targetPort int32, numMaxRetries int) string {
+	for i := 1; i <= numMaxRetries+1; i++ {
+		hostname, err := pokeEndpointHostname(clientContainer, protocol, targetHost, targetPort)
+		if err == nil {
+			framework.Logf("Got hostname after %d attempt(s)", i)
+			return hostname
+		}
+	}
+
+	framework.Failf("Couldn't get hostname even after %d retries", numMaxRetries)
+	return ""
+}
+
 // leverages a container running the netexec command to send a "hostname" request to a target running
 // netexec on the given target host / protocol / port
-func pokeEndpointHostname(clientContainer, protocol, targetHost string, targetPort int32) string {
+func pokeEndpointHostname(clientContainer, protocol, targetHost string, targetPort int32) (string, error) {
 	ipPort := net.JoinHostPort("localhost", "80")
 	cmd := []string{"docker", "exec", clientContainer}
 
@@ -242,9 +255,8 @@ func pokeEndpointHostname(clientContainer, protocol, targetHost string, targetPo
 	cmd = append(cmd, curlCommand...)
 	res, err := runCommand(cmd...)
 	framework.ExpectNoError(err, "failed to run command on external container")
-	hostName, err := parseNetexecResponse(res)
-	framework.ExpectNoError(err)
-	return hostName
+
+	return parseNetexecResponse(res)
 }
 
 func parseNetexecResponse(response string) (string, error) {
